@@ -15,22 +15,22 @@ export default function AdminLayout() {
   const navigate = useNavigate()
 
   return (
-    <div className="min-h-screen flex bg-canvas">
-      <aside className="w-60 shrink-0 border-r border-line bg-white flex flex-col">
-        <div className="h-16 flex items-center px-5 border-b border-line">
+    <div className="min-h-screen flex bg-[radial-gradient(circle_at_top_left,_#f5f7f1,_#fafaf7_42%)]">
+      <aside className="material-surface w-64 shrink-0 border-r border-white/70 bg-white/72 backdrop-blur-xl flex flex-col">
+        <div className="h-[72px] flex items-center px-6 border-b border-white/70">
           <AppBrand />
         </div>
-        <nav className="flex-1 py-4">
+        <nav className="flex-1 px-3 py-5">
           {nav.map(item => (
             <NavLink
               key={item.to}
               to={item.to}
               end={item.end}
               className={({ isActive }) =>
-                `block px-5 py-2.5 text-[13.5px] border-l-2 transition-colors ${
+                `block px-4 py-2.5 rounded-lg text-[13.5px] font-medium transition-[background-color,color,transform] duration-200 active:scale-[0.98] ${
                   isActive
-                    ? 'border-bottle-600 text-bottle-700 bg-bottle-50 font-medium'
-                    : 'border-transparent text-ink/70 hover:text-ink hover:bg-paper'
+                    ? 'text-bottle-700 bg-bottle-100/70 shadow-sm'
+                    : 'text-ink/65 hover:text-ink hover:bg-white/75'
                 }`
               }
             >
@@ -38,13 +38,13 @@ export default function AdminLayout() {
             </NavLink>
           ))}
         </nav>
-        <div className="p-4 border-t border-line">
+        <div className="p-5 border-t border-white/70">
           <button
             onClick={() => {
               logout()
               navigate('/login/admin')
             }}
-            className="focus-ring w-full text-left text-[13px] text-ink/60 hover:text-clay transition-colors"
+            className="focus-ring w-full rounded-lg px-2 py-2 text-left text-[13px] text-ink/60 hover:text-clay hover:bg-clay/5 transition-colors"
           >
             Sign out
           </button>

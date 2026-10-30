@@ -10,10 +10,10 @@ export function PageHeader({
   actions?: React.ReactNode
 }) {
   return (
-    <div className="flex items-start justify-between px-8 pt-8 pb-6 border-b border-line bg-white">
+    <div className="material-surface sticky top-0 z-20 flex items-start justify-between px-8 pt-7 pb-5 border-b border-white/70 bg-white/76 backdrop-blur-xl supports-[backdrop-filter]:bg-white/68">
       <div>
-        <h1 className="text-[19px] font-semibold tracking-tight">{title}</h1>
-        {subtitle && <p className="mt-1 text-[13.5px] text-ink/55">{subtitle}</p>}
+        <h1 className="text-[21px] font-semibold tracking-[-0.025em] leading-tight">{title}</h1>
+        {subtitle && <p className="mt-1.5 text-[13.5px] leading-relaxed text-ink/55">{subtitle}</p>}
       </div>
       {actions && <div className="flex gap-2 shrink-0">{actions}</div>}
     </div>
@@ -25,12 +25,12 @@ export function Button({
   className = '',
   ...props
 }: React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: 'primary' | 'secondary' | 'ghost' | 'danger' }) {
-  const base = 'focus-ring inline-flex items-center gap-1.5 rounded-sm2 text-[13px] font-medium px-3.5 py-2 transition-colors disabled:opacity-40 disabled:pointer-events-none'
+  const base = 'focus-ring inline-flex items-center justify-center gap-1.5 rounded-lg text-[13px] font-semibold px-3.5 py-2 transition-[transform,background-color,box-shadow,color] duration-200 ease-out active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none'
   const styles: Record<string, string> = {
-    primary: 'bg-bottle-600 text-white hover:bg-bottle-700',
-    secondary: 'bg-white text-ink border border-line hover:bg-paper',
-    ghost: 'text-ink/60 hover:text-ink hover:bg-paper',
-    danger: 'bg-white text-clay border border-clay/30 hover:bg-clay/5',
+    primary: 'bg-bottle-600 text-white shadow-sm hover:bg-bottle-700 hover:shadow-md',
+    secondary: 'bg-white/80 text-ink border border-line/80 shadow-sm hover:bg-white hover:shadow-md',
+    ghost: 'text-ink/60 hover:text-ink hover:bg-white/80',
+    danger: 'bg-white/80 text-clay border border-clay/30 hover:bg-clay/5',
   }
   return <button className={`${base} ${styles[variant]} ${className}`} {...props} />
 }
@@ -53,7 +53,7 @@ export function StatusPill({ status }: { status: 'draft' | 'submitted' | 'publis
     inactive: 'Inactive',
   }
   return (
-    <span className={`inline-block px-2 py-0.5 rounded-sm2 text-[11.5px] font-medium ${map[status]}`}>
+    <span className={`inline-block px-2.5 py-1 rounded-full text-[11.5px] font-semibold ${map[status]}`}>
       {label[status]}
     </span>
   )
@@ -86,7 +86,7 @@ export function Row({ children, onClick }: { children: React.ReactNode; onClick?
   return (
     <tr
       onClick={onClick}
-      className={`border-b border-line2 ${onClick ? 'cursor-pointer hover:bg-paper' : ''} transition-colors`}
+      className={`border-b border-line2 ${onClick ? 'cursor-pointer hover:bg-paper/80' : ''} transition-colors duration-150`}
     >
       {children}
     </tr>
@@ -125,7 +125,7 @@ export function Field({
 }
 
 export const inputCls =
-  'focus-ring w-full border border-line rounded-sm2 px-3 py-2 text-[13.5px] bg-white'
+  'focus-ring w-full border border-line/90 rounded-lg px-3 py-2 text-[13.5px] bg-white/90 shadow-sm transition-[border-color,box-shadow] duration-150 placeholder:text-ink/35 focus:border-bottle-400 focus:shadow-[0_0_0_3px_rgba(59,98,73,0.12)]'
 
 export function LoadingState({ message }: { message?: string }) {
   return (

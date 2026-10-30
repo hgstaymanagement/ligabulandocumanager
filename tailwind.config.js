@@ -26,14 +26,16 @@ export default {
       },
       fontFamily: {
         serif: ['"Source Serif 4"', 'Georgia', 'serif'],
-        sans: ['"IBM Plex Sans"', 'system-ui', 'sans-serif'],
+        sans: ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Text"', '"Segoe UI"', 'system-ui', 'sans-serif'],
         mono: ['"IBM Plex Mono"', 'monospace'],
       },
       boxShadow: {
         doc: '0 1px 2px rgba(28,27,23,0.06), 0 8px 24px rgba(28,27,23,0.08)',
+        float: '0 1px 2px rgba(15,31,22,0.06), 0 18px 48px rgba(15,31,22,0.12)',
       },
       borderRadius: {
         sm2: '3px',
+        app: '14px',
       },
     },
   },

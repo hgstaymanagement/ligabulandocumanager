@@ -13,8 +13,8 @@ export default function ClientLayout() {
   const navigate = useNavigate()
 
   return (
-    <div className="min-h-screen bg-canvas">
-      <header className="h-16 border-b border-line bg-white flex items-center px-6 gap-8">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_#f5f7f1,_#fafaf7_42%)]">
+      <header className="material-surface sticky top-0 z-30 h-[72px] border-b border-white/70 bg-white/72 backdrop-blur-xl flex items-center px-6 gap-8">
         <AppBrand />
         <nav className="flex items-center gap-1">
           {nav.map(item => (
@@ -23,8 +23,8 @@ export default function ClientLayout() {
               to={item.to}
               end={item.end}
               className={({ isActive }) =>
-                `px-3.5 py-1.5 rounded-sm2 text-[13.5px] transition-colors ${
-                  isActive ? 'bg-bottle-600 text-white' : 'text-ink/70 hover:bg-paper'
+                `px-3.5 py-2 rounded-lg text-[13.5px] font-medium transition-[transform,background-color,color] duration-200 active:scale-[0.97] ${
+                  isActive ? 'bg-bottle-600 text-white shadow-sm' : 'text-ink/70 hover:bg-white/80'
                 }`
               }
             >
@@ -45,7 +45,7 @@ export default function ClientLayout() {
           </button>
         </div>
       </header>
-      <main className="max-w-6xl mx-auto px-6 py-8">
+      <main className="max-w-6xl mx-auto px-6 py-8 apple-enter">
         <Outlet />
       </main>
     </div>

@@ -19,30 +19,30 @@ export default function Overview() {
   return (
     <div>
       <PageHeader title="Overview" subtitle="Municipality of Bulan, Sorsogon — 63 barangays" />
-      <div className="p-8">
-        <div className="grid grid-cols-4 gap-4 mb-10">
+      <div className="p-8 apple-enter">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-10">
           {stats.map(s => (
-            <div key={s.label} className="border border-line rounded-sm2 bg-white p-5">
-              <div className="text-[26px] font-semibold tracking-tight">{s.value}</div>
+            <div key={s.label} className="material-surface border border-white/80 rounded-app bg-white/74 backdrop-blur-xl p-5 shadow-sm transition-[transform,box-shadow] duration-200 hover:-translate-y-0.5 hover:shadow-md">
+              <div className="text-[28px] font-semibold tracking-[-0.035em] leading-none">{s.value}</div>
               <div className="mt-1 text-[12.5px] text-ink/50">{s.label}</div>
             </div>
           ))}
         </div>
 
-        <div className="grid grid-cols-3 gap-8">
-          <div className="col-span-2">
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+          <div className="xl:col-span-2">
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-[14px] font-medium">Recent submissions</h2>
               <Link to="/admin/submissions" className="text-[12.5px] text-bottle-600 hover:underline">
                 View all
               </Link>
             </div>
-            <div className="border border-line rounded-sm2 bg-white divide-y divide-line2">
+            <div className="material-surface overflow-hidden border border-white/80 rounded-app bg-white/74 backdrop-blur-xl divide-y divide-line2 shadow-sm">
               {recent.map(s => (
                 <Link
                   key={s.id}
                   to="/admin/submissions"
-                  className="flex items-center justify-between px-5 py-3.5 hover:bg-paper transition-colors"
+                  className="flex items-center justify-between px-5 py-3.5 hover:bg-white/80 transition-colors duration-150"
                 >
                   <div>
                     <div className="text-[13.5px] font-medium">{formName(s.formId)}</div>
@@ -58,7 +58,7 @@ export default function Overview() {
 
           <div>
             <h2 className="text-[14px] font-medium mb-3">Submission status</h2>
-            <div className="border border-line rounded-sm2 bg-white p-5 space-y-4">
+            <div className="material-surface border border-white/80 rounded-app bg-white/74 backdrop-blur-xl p-5 space-y-4 shadow-sm">
               <div>
                 <div className="flex justify-between text-[12.5px] mb-1.5">
                   <span className="text-ink/60">Submitted</span>

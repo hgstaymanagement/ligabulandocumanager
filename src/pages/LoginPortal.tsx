@@ -4,11 +4,11 @@ import { Button } from '../components/ui'
 
 export default function LoginPortal() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-paper px-4">
-      <div className="w-full max-w-md text-center">
+    <div className="min-h-screen flex items-center justify-center bg-[radial-gradient(circle_at_top,_#f1f5ef,_#f7f5ee_55%)] px-4">
+      <div className="w-full max-w-md text-center apple-enter">
         <AppBrand size="lg" stacked />
 
-        <div className="mt-10 bg-white border border-line shadow-doc rounded-sm2 p-8">
+        <div className="material-surface mt-10 bg-white/82 backdrop-blur-xl border border-white/80 shadow-float rounded-app p-8">
           <p className="text-[14px] text-ink/70 leading-relaxed mb-6">
             Sign in to manage documents, forms, and submissions for the Municipality of Bulan.
           </p>

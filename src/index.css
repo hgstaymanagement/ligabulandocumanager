@@ -10,6 +10,8 @@ html, body, #root {
 
 body {
   @apply bg-canvas text-ink font-sans antialiased;
+  font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
+  text-rendering: optimizeLegibility;
 }
 
 ::selection {
@@ -18,6 +20,41 @@ body {
 
 .focus-ring {
   @apply outline-none focus-visible:ring-2 focus-visible:ring-bottle-600 focus-visible:ring-offset-2 focus-visible:ring-offset-canvas;
+}
+
+button, a, input, select, textarea {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:not(:disabled), [role="button"] {
+  touch-action: manipulation;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .apple-enter {
+    animation: apple-enter 360ms cubic-bezier(.2, .8, .2, 1) both;
+  }
+
+  @keyframes apple-enter {
+    from { opacity: 0; transform: translateY(10px) scale(.985); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 120ms !important;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  .material-surface {
+    background: rgba(255, 255, 255, .97) !important;
+    backdrop-filter: none !important;
+  }
 }
 
 @media print {
