@@ -40,7 +40,7 @@ const PALETTE: { group: string; items: { type: FieldType; label: string }[] }[] 
     items: [
       { type: 'static_text', label: 'Static Text' },
       { type: 'section_heading', label: 'Section Heading' },
-      { type: 'dynamic_text', label: 'Dynamic Text' },
+      { type: 'dynamic_text', label: 'Rich Text / Fillable Blanks' },
       { type: 'signature', label: 'Signature' },
       { type: 'printed_name', label: 'Printed Name' },
       { type: 'position', label: 'Position' },
@@ -129,14 +129,8 @@ export default function FormBuilder() {
       databaseField: isDb ? resolveDatabaseFieldFromPalette(label) : undefined,
       options: type === 'dropdown' || type === 'radio' ? ['Option A', 'Option B'] : undefined,
       columns:
-        type === 'table'
-          ? [
-              { id: 'c1', label: 'Description', width: 6, type: 'short_text' },
-              { id: 'c2', label: 'Qty', width: 2, type: 'number', paragraphStyle: { ...DEFAULT_PARAGRAPH_STYLE, align: 'right' } },
-              { id: 'c3', label: 'Amount', width: 4, type: 'currency', paragraphStyle: { ...DEFAULT_PARAGRAPH_STYLE, align: 'right' } },
-            ]
-          : undefined,
-      tokens: type === 'dynamic_text' ? [{ type: 'text', value: 'Enter dynamic text…' }] : undefined,
+        type === 'table' ? [] : undefined,
+      tokens: type === 'dynamic_text' ? [{ type: 'text', value: 'Enter rich text, fillable blanks, or dynamic fields…' }] : undefined,
       paragraphStyle:
         type === 'dynamic_text' || type === 'static_text'
           ? { ...DEFAULT_PARAGRAPH_STYLE }

@@ -37,12 +37,14 @@ function pseudoName(seed: number) {
 }
 
 export const officials: Official[] = barangays.flatMap((b, i) => {
-  const roles: Official['position'][] = ['Punong Barangay', 'Treasurer', 'Secretary', 'Kagawad', 'Kagawad']
+  const roles: Official['position'][] = ['Punong Barangay', 'Treasurer', 'Secretary', 'Kagawad 1', 'Kagawad 2']
   return roles.map((position, j) => ({
     id: `${b.id}-off-${j}`,
     barangayId: b.id,
     position,
     name: pseudoName(i * 7 + j),
+    secondaryDesignation: '',
+    tertiaryDesignation: '',
   }))
 })
 

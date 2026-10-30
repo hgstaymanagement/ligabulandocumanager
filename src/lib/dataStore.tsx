@@ -51,8 +51,8 @@ interface Ctx {
   updateBarangayName: (id: string, name: string) => void
   deleteBarangay: (id: string) => void
 
-  createOfficial: (barangayId: string, name: string, position: string) => Promise<void>
-  updateOfficial: (id: string, patch: { name?: string; position?: string }) => void
+  createOfficial: (barangayId: string, name: string, position: string, secondaryDesignation?: string, tertiaryDesignation?: string) => Promise<void>
+  updateOfficial: (id: string, patch: Partial<Pick<Official, 'name' | 'position' | 'secondaryDesignation' | 'tertiaryDesignation'>>) => void
   deleteOfficial: (id: string) => void
 
   createSubmission: (input: Omit<Submission, 'id'>) => Promise<string>
@@ -204,7 +204,16 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   function officialSnapshotFor(barangayId: string) {
     const list = officials.filter(o => o.barangayId === barangayId)
     const snap: Record<string, string> = {}
-    for (const o of list) if (!snap[o.position]) snap[o.position] = o.name
+    let legacyKagawadIndex = 1
+    for (const o of list) {
+      // Older records used the shared "Kagawad" position. Keep those forms
+      // working by assigning stable numbered keys for the current list, while
+      // new records use explicit Kagawad 1–7 positions chosen by the admin.
+      const primaryPosition = o.position === 'Kagawad' ? `Kagawad ${legacyKagawadIndex++}` : o.position
+      for (const designation of [primaryPosition, o.secondaryDesignation, o.tertiaryDesignation]) {
+        if (designation && !snap[designation]) snap[designation] = o.name
+      }
+    }
     return snap
   }
 
@@ -345,9 +354,13 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   }
 
   async function createBarangay(name: string): Promise<string> {
-    const { data, error: err } = await supabase.from('barangays').insert({ name }).select().single()
+    const { data, error: err } = await supabase
+      .from('barangays')
+      .insert({ name })
+      .select()
+      .single()
     throwIfError(err)
-    setBarangays(bs => [...bs, { id: data.id, name }].sort((a, b) => a.name.localeCompare(b.name)))
+    setBarangays(bs => [...bs, mapBarangay(data as DbBarangay)].sort((a, b) => a.name.localeCompare(b.name)))
     return data.id
   }
 
@@ -374,21 +387,23 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       })
   }
 
-  async function createOfficial(barangayId: string, name: string, position: string) {
+  async function createOfficial(barangayId: string, name: string, position: string, secondaryDesignation = '', tertiaryDesignation = '') {
     const { data, error: err } = await supabase
       .from('officials')
-      .insert({ barangay_id: barangayId, name, position })
+      .insert({ barangay_id: barangayId, name, position, secondary_designation: secondaryDesignation, tertiary_designation: tertiaryDesignation })
       .select()
       .single()
     throwIfError(err)
-    setOfficials(os => [...os, { id: data.id, barangayId, name, position: position as Official['position'] }])
+    setOfficials(os => [...os, mapOfficial(data as DbOfficial)])
   }
 
-  function updateOfficial(id: string, patch: { name?: string; position?: string }) {
+  function updateOfficial(id: string, patch: Partial<Pick<Official, 'name' | 'position' | 'secondaryDesignation' | 'tertiaryDesignation'>>) {
     setOfficials(os => os.map(o => (o.id === id ? ({ ...o, ...patch } as Official) : o)))
     const fields: Record<string, unknown> = {}
     if (patch.name !== undefined) fields.name = patch.name
     if (patch.position !== undefined) fields.position = patch.position
+    if (patch.secondaryDesignation !== undefined) fields.secondary_designation = patch.secondaryDesignation
+    if (patch.tertiaryDesignation !== undefined) fields.tertiary_designation = patch.tertiaryDesignation
     supabase
       .from('officials')
       .update(fields)

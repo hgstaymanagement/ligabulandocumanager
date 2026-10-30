@@ -26,6 +26,8 @@ export default function FormPreview() {
 
   const sampleData = {
     barangay_name: 'Zone I (Pob.)',
+    bac_member_1: 'Sample BAC Member',
+    committee_on_appropriation: 'Sample Committee Chair',
     punong_barangay: 'Juan Dela Cruz',
     treasurer: 'Maria Santos',
     secretary: 'Pedro Reyes',

@@ -19,7 +19,9 @@ export function paragraphStyleToCss(style: ParagraphStyle | undefined): CSSPrope
   const s = style ?? DEFAULT_PARAGRAPH_STYLE
   const css: CSSProperties = {
     textAlign: s.align,
-    textIndent: s.indent,
+    // A string with an explicit unit is more reliable than React's numeric
+    // shorthand here, particularly in the print/PDF rendering path.
+    textIndent: `${s.indent}px`,
     lineHeight: s.lineHeight,
     // Preserve line breaks the person actually typed (e.g. separating
     // paragraphs in the Dynamic Text template). The browser's default

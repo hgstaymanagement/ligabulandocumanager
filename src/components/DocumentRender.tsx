@@ -4,6 +4,8 @@ import { textAndParagraphCss } from '../lib/textStyle'
 import { splitTokensIntoParagraphs } from '../lib/dynamicTextParagraphs'
 import { sumColumn, formatSum } from '../lib/formula'
 import { borderClass } from '../lib/borderStyle'
+import { hidesEntryLabel } from '../lib/formFields'
+import { RichText } from './RichText'
 
 export interface RenderData {
   [key: string]: string | number | boolean | undefined
@@ -80,10 +82,28 @@ function FilledContent({ el, data, rows }: { el: FormElement; data: RenderData; 
       return (
         <div>
           {paragraphs.map((tokens, pi) => (
-            <p key={pi} className="text-[12.5px]" style={textAndParagraphCss(el.paragraphStyle, el.textStyle)} lang="en">
-              {tokens.map((t, i) =>
-                t.type === 'text' ? <span key={i}>{t.value}</span> : <span key={i}>{data[t.fieldId ?? ''] ?? `{{${t.fieldId}}}`}</span>
-              )}
+            <p
+              key={pi}
+              className="text-[12.5px]"
+              style={{
+                ...textAndParagraphCss(el.paragraphStyle, el.textStyle),
+                // Tailwind's preflight removes paragraph margins. Restore a
+                // deliberate gap only between authored paragraphs.
+                marginBottom: pi === paragraphs.length - 1 ? 0 : '0.75em',
+              }}
+              lang="en"
+            >
+              {tokens.map((t, i) => {
+                if (t.type === 'text') return <RichText key={i}>{t.value}</RichText>
+                if (t.type === 'input') {
+                  return (
+                    <span key={i} className="inline-block min-w-28 px-1 text-center">
+                      {data[t.fieldId ?? ''] ?? '\u00A0'}
+                    </span>
+                  )
+                }
+                return <span key={i}>{data[t.fieldId ?? ''] ?? `{{${t.fieldId}}}`}</span>
+              })}
             </p>
           ))}
         </div>
@@ -107,7 +127,7 @@ function FilledContent({ el, data, rows }: { el: FormElement; data: RenderData; 
             </tr>
           </thead>
           <tbody>
-            {(rows && rows.length ? rows : [{}, {}]).map((r, i) => (
+            {(rows ?? []).map((r, i) => (
               <tr key={i}>
                 {cols.map(c => (
                   <td key={c.id} className="border border-ink/40 px-1.5 py-1.5 h-6 align-top" style={textAndParagraphCss(c.paragraphStyle, c.textStyle)}>
@@ -165,7 +185,7 @@ function FilledContent({ el, data, rows }: { el: FormElement; data: RenderData; 
     default:
       return (
         <div>
-          <div className="text-[10.5px] text-ink/50 mb-0.5">{el.label}</div>
+          {!hidesEntryLabel(el) && <div className="text-[10.5px] text-ink/50 mb-0.5">{el.label}</div>}
           <div className="border-b border-ink/50 text-[12.5px] pb-0.5 min-h-[16px]">
             {String(resolveValue(el, data) ?? '')}
           </div>

@@ -11,6 +11,8 @@ export interface DbOfficial {
   barangay_id: string
   position: string
   name: string
+  secondary_designation?: string | null
+  tertiary_designation?: string | null
 }
 
 export interface DbProfile {
@@ -73,6 +75,8 @@ export function mapOfficial(row: DbOfficial): Official {
     barangayId: row.barangay_id,
     position: row.position as Official['position'],
     name: row.name,
+    secondaryDesignation: row.secondary_designation ?? '',
+    tertiaryDesignation: row.tertiary_designation ?? '',
   }
 }
 

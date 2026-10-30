@@ -3,8 +3,9 @@ import { resolveCollision, rectsOverlap, clampToGrid, getPageGeometry, COLS } fr
 import { evaluateRowFormula, recomputeRow, sumColumn, formatSum } from './formula'
 import { splitTokensIntoParagraphs } from './dynamicTextParagraphs'
 import { resolveDatabaseFieldFromPalette } from './databaseFields'
-import { getFillableInputElements } from './formFields'
+import { getFillableInputElements, hidesEntryLabel } from './formFields'
 import { tableFooterCellKind } from './tableFooter'
+import { designationFieldKey } from './designations'
 import type { FormElement } from './types'
 
 describe('pageGeometry', () => {
@@ -67,7 +68,10 @@ describe('dynamic text', () => {
       { type: 'field', fieldId: 'applicant' },
     ])
     expect(paragraphs).toHaveLength(2)
-    expect(paragraphs[1][0]).toEqual({ type: 'field', fieldId: 'applicant' })
+    expect(paragraphs[1]).toEqual([
+      { type: 'text', value: 'Line two' },
+      { type: 'field', fieldId: 'applicant' },
+    ])
   })
 })
 
@@ -78,7 +82,19 @@ describe('database palette mapping', () => {
   })
 })
 
+describe('designation field keys', () => {
+  it('turns designation names into stable form binding keys', () => {
+    expect(designationFieldKey('BAC Secretariat')).toBe('bac_secretariat')
+    expect(designationFieldKey('Committee on Appropriation')).toBe('committee_on_appropriation')
+  })
+})
+
 describe('fillable fields', () => {
+  it('hides the builder-only rich-text label in rendered entries', () => {
+    expect(hidesEntryLabel({ label: 'Rich Text (with fillable blanks)' })).toBe(true)
+    expect(hidesEntryLabel({ label: 'Purpose of request' })).toBe(false)
+  })
+
   it('only includes page-1 input elements', () => {
     const elements: FormElement[] = [
       { id: 'a', type: 'short_text', label: 'Purpose', source: 'input', x: 0, y: 0, w: 6, h: 1, page: 1 },

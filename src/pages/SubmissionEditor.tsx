@@ -5,7 +5,7 @@ import { useAuth } from '../lib/auth'
 import type { FormElement, Submission, TableColumn } from '../lib/types'
 import DocumentRender, { type RenderData } from '../components/DocumentRender'
 import { recomputeRow, sumColumn, formatSum } from '../lib/formula'
-import { getFillableInputElements } from '../lib/formFields'
+import { getFillableInputElements, getInlineTextInputs } from '../lib/formFields'
 import { textStyleToCss } from '../lib/textStyle'
 import { Button, Field, inputCls, StatusPill } from '../components/ui'
 
@@ -56,6 +56,7 @@ export default function SubmissionEditor({ mode }: { mode: 'client' | 'admin' })
   )
 
   const inputElements = getFillableInputElements(version.elements)
+  const inlineTextInputs = getInlineTextInputs(version.elements)
   const tableElements = version.elements.filter(e => e.type === 'table')
 
   function setField(el: FormElement, v: string) {
@@ -77,6 +78,13 @@ export default function SubmissionEditor({ mode }: { mode: 'client' | 'admin' })
       rows[idx] = recomputeRow(edited, columns)
       return { ...tr, [tableId]: rows }
     })
+  }
+
+  function deleteRow(tableId: string, idx: number) {
+    setTableRows(tr => ({
+      ...tr,
+      [tableId]: (tr[tableId] ?? []).filter((_, rowIndex) => rowIndex !== idx),
+    }))
   }
 
   async function save(nextStatus: Submission['status']) {
@@ -163,6 +171,14 @@ export default function SubmissionEditor({ mode }: { mode: 'client' | 'admin' })
             {inputElements.map(el => (
               <ElementInput key={el.id} el={el} value={values[el.id] ?? ''} onChange={v => setField(el, v)} />
             ))}
+            {inlineTextInputs.map(input => (
+              <ElementInput
+                key={input.id}
+                el={{ id: input.id, label: input.label, type: 'short_text', source: 'input', x: 0, y: 0, w: 1, h: 1, page: 1 }}
+                value={values[input.id] ?? ''}
+                onChange={v => setValues(values => ({ ...values, [input.id]: v }))}
+              />
+            ))}
 
             {tableElements.map(tel => {
               const summarizeCols = (tel.columns ?? []).filter(c => c.summarize)
@@ -170,19 +186,50 @@ export default function SubmissionEditor({ mode }: { mode: 'client' | 'admin' })
               return (
                 <div key={tel.id}>
                   <span className="block text-[12.5px] text-ink/60 mb-2">{tel.label}</span>
-                  <div className="space-y-2">
-                    {rows.map((row, i) => (
-                      <div key={i} className="border border-line rounded-sm2 p-2.5 space-y-1.5">
-                        {(tel.columns ?? []).map(c => (
-                          <TableCellInput
-                            key={c.id}
-                            column={c}
-                            value={row[c.id] ?? ''}
-                            onChange={v => updateRow(tel.id, i, c.id, v, tel.columns ?? [])}
-                          />
+                  {(tel.columns ?? []).length === 0 ? (
+                    <p className="rounded-lg border border-dashed border-line px-3 py-3 text-[12px] text-ink/40">
+                      This table has no columns yet. Ask an administrator to configure it in the form builder.
+                    </p>
+                  ) : (
+                  <div className="space-y-2 overflow-x-auto">
+                    <table className="w-full min-w-[540px] border-separate border-spacing-0 text-left text-[12px]">
+                      <thead>
+                        <tr>
+                          {(tel.columns ?? []).map(column => (
+                            <th key={column.id} className="border-y border-l border-line bg-paper px-2 py-2 font-medium text-ink/60 last:border-r">
+                              {column.label}
+                            </th>
+                          ))}
+                          <th className="w-8 border-y border-l border-r border-line bg-paper" aria-label="Row actions" />
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {rows.map((row, i) => (
+                          <tr key={i}>
+                            {(tel.columns ?? []).map(column => (
+                              <td key={column.id} className="border-b border-l border-line bg-white p-1.5 last:border-r">
+                                <TableCellInput
+                                  column={column}
+                                  value={row[column.id] ?? ''}
+                                  onChange={v => updateRow(tel.id, i, column.id, v, tel.columns ?? [])}
+                                />
+                              </td>
+                            ))}
+                            <td className="border-b border-l border-r border-line bg-white p-1 text-center">
+                              <button
+                                type="button"
+                                onClick={() => deleteRow(tel.id, i)}
+                                className="focus-ring rounded p-1 text-ink/35 hover:bg-clay/10 hover:text-clay"
+                                title="Delete row"
+                                aria-label={`Delete row ${i + 1}`}
+                              >
+                                ×
+                              </button>
+                            </td>
+                          </tr>
                         ))}
-                      </div>
-                    ))}
+                      </tbody>
+                    </table>
                     <Button variant="secondary" className="w-full justify-center" onClick={() => addRow(tel.id, tel.columns ?? [])}>
                       + Add row
                     </Button>
@@ -197,6 +244,7 @@ export default function SubmissionEditor({ mode }: { mode: 'client' | 'admin' })
                       </div>
                     )}
                   </div>
+                  )}
                 </div>
               )
             })}
@@ -262,15 +310,14 @@ function TableCellInput({
   value: string
   onChange: (v: string) => void
 }) {
-  const cls = `${inputCls} text-[12.5px] py-1.5`
+  const cls = `${inputCls} min-w-24 border-0 bg-transparent px-1.5 py-1 text-[12.5px] shadow-none focus:shadow-[0_0_0_2px_rgba(59,98,73,0.16)]`
 
   if (column.type === 'calculated') {
     return (
       <div
-        className="flex items-center justify-between gap-2 border border-line rounded-sm2 px-3 py-1.5 bg-paper text-[12.5px]"
+        className="flex min-w-24 items-center justify-end gap-2 px-1.5 py-1 text-[12.5px]"
         style={{ textAlign: column.paragraphStyle?.align ?? 'left', ...textStyleToCss(column.textStyle) }}
       >
-        <span className="text-ink/50">{column.label}</span>
         <span className="font-medium tabular-nums">{value || '0'}</span>
       </div>
     )
@@ -289,7 +336,7 @@ function TableCellInput({
   }
   if (column.type === 'checkbox') {
     return (
-      <label className="flex items-center gap-2 text-[12.5px]" style={textStyleToCss(column.textStyle)}>
+      <label className="flex min-h-7 items-center justify-center gap-2" style={textStyleToCss(column.textStyle)}>
         <input type="checkbox" checked={!!value} onChange={e => onChange(e.target.checked ? 'true' : '')} className="accent-bottle-600" />
         {column.label}
       </label>
@@ -303,7 +350,7 @@ function TableCellInput({
         textAlign: column.paragraphStyle?.align === 'justify' ? 'left' : (column.paragraphStyle?.align ?? 'left'),
         ...textStyleToCss(column.textStyle),
       }}
-      placeholder={column.label}
+      aria-label={column.label}
       value={value}
       onChange={e => onChange(e.target.value)}
     />

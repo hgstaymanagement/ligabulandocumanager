@@ -12,7 +12,9 @@ export const DATABASE_FIELDS: DatabaseFieldOption[] = [
   { value: 'punong_barangay', label: 'Punong Barangay' },
   { value: 'treasurer', label: 'Treasurer' },
   { value: 'secretary', label: 'Secretary' },
-  { value: 'kagawad', label: 'Kagawad' },
+  ...Array.from({ length: 7 }, (_, index) => ({ value: `kagawad_${index + 1}`, label: `Kagawad ${index + 1}` })),
+  ...SECONDARY_DESIGNATIONS.map(label => ({ value: designationFieldKey(label), label })),
+  ...TERTIARY_DESIGNATIONS.map(label => ({ value: designationFieldKey(label), label })),
 ]
 
 /** Maps builder palette labels to canonical database field ids. */
@@ -26,3 +28,5 @@ export const DATABASE_PALETTE_LABELS: Record<string, string> = {
 export function resolveDatabaseFieldFromPalette(label: string): string | undefined {
   return DATABASE_PALETTE_LABELS[label]
 }
+import { designationFieldKey, SECONDARY_DESIGNATIONS, TERTIARY_DESIGNATIONS } from './designations'
+

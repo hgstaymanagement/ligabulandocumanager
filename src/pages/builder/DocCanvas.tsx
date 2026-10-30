@@ -5,6 +5,7 @@ import { textAndParagraphCss } from '../../lib/textStyle'
 import { splitTokensIntoParagraphs } from '../../lib/dynamicTextParagraphs'
 import { borderClass } from '../../lib/borderStyle'
 import { tableFooterCellKind } from '../../lib/tableFooter'
+import { RichText } from '../../components/RichText'
 
 export default function DocCanvas({
   pageLayout,
@@ -32,7 +33,10 @@ export default function DocCanvas({
     onSelect(el.id)
     setDragId(el.id)
     setGhost({ x: el.x, y: el.y })
-    ref.current?.setPointerCapture(e.pointerId)
+    // Capture on the element itself. Capturing on the page container causes
+    // the release click to be retargeted to the empty canvas, whose click
+    // handler clears selection and makes the inspector disappear.
+    e.currentTarget.setPointerCapture(e.pointerId)
   }
 
   function handlePointerMove(e: React.PointerEvent) {
@@ -209,10 +213,22 @@ function ElementContent({ el }: { el: FormElement }) {
       return (
         <div>
           {paragraphs.map((tokens, pi) => (
-            <p key={pi} className="text-[12.5px] text-ink/80" style={textAndParagraphCss(el.paragraphStyle, el.textStyle)} lang="en">
+            <p
+              key={pi}
+              className="text-[12.5px] text-ink/80"
+              style={{
+                ...textAndParagraphCss(el.paragraphStyle, el.textStyle),
+                marginBottom: pi === paragraphs.length - 1 ? 0 : '0.75em',
+              }}
+              lang="en"
+            >
               {tokens.map((t, i) =>
                 t.type === 'text' ? (
-                  <span key={i}>{t.value}</span>
+                  <RichText key={i}>{t.value}</RichText>
+                ) : t.type === 'input' ? (
+                  <span key={i} className="inline-block min-w-24 border-b border-bottle-600/60 px-1 text-center font-medium text-bottle-700">
+                    {`[[${t.label ?? t.fieldId}]]`}
+                  </span>
                 ) : (
                   <span key={i} className="font-medium text-bottle-700">
                     {`{{${t.fieldId}}}`}

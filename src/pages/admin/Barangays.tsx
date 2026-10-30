@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { useAppData } from '../../lib/dataStore'
 import type { Official } from '../../lib/types'
+import { SECONDARY_DESIGNATIONS, TERTIARY_DESIGNATIONS } from '../../lib/designations'
 import { PageHeader, LedgerTable, Row, Cell, Button, inputCls } from '../../components/ui'
 
-const POSITIONS = ['Punong Barangay', 'Treasurer', 'Secretary', 'Kagawad']
+const POSITIONS = ['Punong Barangay', 'Treasurer', 'Secretary', ...Array.from({ length: 7 }, (_, index) => `Kagawad ${index + 1}`)]
 
 export default function Barangays() {
   const {
@@ -43,8 +44,8 @@ export default function Barangays() {
     if (active === id) setActive(barangays.find(x => x.id !== id)?.id ?? '')
   }
 
-  function handleAddOfficial(name: string, position: string) {
-    createOfficial(active, name, position)
+  function handleAddOfficial(name: string, position: string, secondaryDesignation: string, tertiaryDesignation: string) {
+    createOfficial(active, name, position, secondaryDesignation, tertiaryDesignation)
     setAddingOfficial(false)
   }
 
@@ -116,8 +117,8 @@ export default function Barangays() {
               </div>
               <p className="text-[12.5px] text-ink/50 mb-6">Barangay officials</p>
 
-              <div className="border border-line rounded-sm2 bg-white px-5 max-w-2xl">
-                <LedgerTable columns={['Position', 'Name', '']}>
+              <div className="border border-line rounded-sm2 bg-white px-5 max-w-6xl overflow-x-auto">
+                <LedgerTable columns={['Primary position', 'Name', 'Secondary designation', 'Tertiary designation', '']}>
                   {list.map(o => (
                     <Row key={o.id}>
                       <Cell className="text-ink/60">
@@ -151,6 +152,22 @@ export default function Barangays() {
                           <span className="font-medium">{o.name}</span>
                         )}
                       </Cell>
+                      <Cell className="min-w-48">
+                        <DesignationSelect
+                          value={o.secondaryDesignation}
+                          options={SECONDARY_DESIGNATIONS}
+                          unavailable={list.filter(other => other.id !== o.id).map(other => other.secondaryDesignation)}
+                          onChange={secondaryDesignation => updateOfficial(o.id, { secondaryDesignation })}
+                        />
+                      </Cell>
+                      <Cell className="min-w-64">
+                        <DesignationSelect
+                          value={o.tertiaryDesignation}
+                          options={TERTIARY_DESIGNATIONS}
+                          unavailable={list.filter(other => other.id !== o.id).map(other => other.tertiaryDesignation)}
+                          onChange={tertiaryDesignation => updateOfficial(o.id, { tertiaryDesignation })}
+                        />
+                      </Cell>
                       <Cell className="text-right space-x-1">
                         <Button variant="ghost" onClick={() => setEditingOfficialId(o.id)}>
                           Edit
@@ -167,7 +184,7 @@ export default function Barangays() {
                 )}
               </div>
 
-              <div className="max-w-2xl mt-3">
+              <div className="max-w-6xl mt-3">
                 {addingOfficial ? (
                   <AddOfficialForm onAdd={handleAddOfficial} onCancel={() => setAddingOfficial(false)} />
                 ) : (
@@ -193,18 +210,46 @@ export default function Barangays() {
   )
 }
 
+function DesignationSelect({
+  value,
+  options,
+  unavailable,
+  onChange,
+}: {
+  value: string
+  options: readonly string[]
+  unavailable: string[]
+  onChange: (value: string) => void
+}) {
+  const hasLegacyValue = value !== '' && !options.includes(value)
+
+  return (
+    <select className={`${inputCls} py-1.5`} value={value} onChange={e => onChange(e.target.value)}>
+      <option value="">None</option>
+      {hasLegacyValue && <option value={value}>{value}</option>}
+      {options.map(option => (
+        <option key={option} value={option} disabled={unavailable.includes(option)}>
+          {option}
+        </option>
+      ))}
+    </select>
+  )
+}
+
 function AddOfficialForm({
   onAdd,
   onCancel,
 }: {
-  onAdd: (name: string, position: string) => void
+  onAdd: (name: string, position: string, secondaryDesignation: string, tertiaryDesignation: string) => void
   onCancel: () => void
 }) {
   const [name, setName] = useState('')
   const [position, setPosition] = useState(POSITIONS[0])
+  const [secondaryDesignation, setSecondaryDesignation] = useState('')
+  const [tertiaryDesignation, setTertiaryDesignation] = useState('')
 
   return (
-    <div className="border border-line rounded-sm2 bg-white p-4 flex items-end gap-3">
+    <div className="border border-line rounded-sm2 bg-white p-4 grid grid-cols-1 md:grid-cols-5 items-end gap-3">
       <div className="flex-1">
         <label className="block text-[11.5px] text-ink/50 mb-1">Name</label>
         <input
@@ -225,13 +270,21 @@ function AddOfficialForm({
           ))}
         </select>
       </div>
+      <div>
+        <label className="block text-[11.5px] text-ink/50 mb-1">Secondary</label>
+        <DesignationSelect value={secondaryDesignation} options={SECONDARY_DESIGNATIONS} unavailable={[]} onChange={setSecondaryDesignation} />
+      </div>
+      <div>
+        <label className="block text-[11.5px] text-ink/50 mb-1">Tertiary</label>
+        <DesignationSelect value={tertiaryDesignation} options={TERTIARY_DESIGNATIONS} unavailable={[]} onChange={setTertiaryDesignation} />
+      </div>
       <Button variant="secondary" onClick={onCancel}>
         Cancel
       </Button>
       <Button
         disabled={!name.trim()}
         onClick={() => {
-          onAdd(name.trim(), position)
+          onAdd(name.trim(), position, secondaryDesignation, tertiaryDesignation)
           setName('')
         }}
       >

@@ -9,6 +9,8 @@ export interface Official {
   barangayId: string
   position: 'Punong Barangay' | 'Treasurer' | 'Secretary' | 'Kagawad' | string
   name: string
+  secondaryDesignation: string
+  tertiaryDesignation: string
 }
 
 export interface Barangay {
@@ -65,9 +67,10 @@ export interface BorderStyle {
 }
 
 export interface DynamicTextToken {
-  type: 'text' | 'field'
+  type: 'text' | 'field' | 'input'
   value?: string
   fieldId?: string
+  label?: string
 }
 
 export type TableColumnType = 'short_text' | 'number' | 'currency' | 'date' | 'dropdown' | 'checkbox' | 'calculated'

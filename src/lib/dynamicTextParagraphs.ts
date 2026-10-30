@@ -20,7 +20,7 @@ export function splitTokensIntoParagraphs(tokens: DynamicTextToken[] | undefined
   const paragraphs: DynamicTextToken[][] = [[]]
 
   for (const t of tokens) {
-    if (t.type === 'field') {
+    if (t.type === 'field' || t.type === 'input') {
       paragraphs[paragraphs.length - 1].push(t)
       continue
     }

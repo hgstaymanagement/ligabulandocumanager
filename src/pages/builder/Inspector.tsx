@@ -188,14 +188,24 @@ export default function Inspector({
 
 function tokensToTemplate(tokens?: FormElement['tokens']) {
   if (!tokens) return ''
-  return tokens.map(t => (t.type === 'text' ? t.value : `{{${t.fieldId}}}`)).join('')
+  return tokens.map(t => (t.type === 'text' ? t.value : t.type === 'input' ? `[[${t.label ?? t.fieldId}]]` : `{{${t.fieldId}}}`)).join('')
 }
 
 function templateToTokens(template: string): DynamicTextToken[] {
-  const parts = template.split(/(\{\{[a-zA-Z0-9_]+\}\})/g).filter(Boolean)
+  const parts = template.split(/(\{\{[a-zA-Z0-9_]+\}\}|\[\[[^\]\n]+\]\])/g).filter(Boolean)
+  const usedInputIds = new Map<string, number>()
   return parts.map(p => {
     const m = p.match(/^\{\{([a-zA-Z0-9_]+)\}\}$/)
-    return m ? { type: 'field' as const, fieldId: m[1] } : { type: 'text' as const, value: p }
+    if (m) return { type: 'field' as const, fieldId: m[1] }
+    const input = p.match(/^\[\[([^\]\n]+)\]\]$/)
+    if (input) {
+      const label = input[1].trim()
+      const base = `inline_${label.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '') || 'entry'}`
+      const count = (usedInputIds.get(base) ?? 0) + 1
+      usedInputIds.set(base, count)
+      return { type: 'input' as const, fieldId: count === 1 ? base : `${base}_${count}`, label }
+    }
+    return { type: 'text' as const, value: p }
   })
 }
 
@@ -229,7 +239,7 @@ function DynamicTextEditor({
   }
 
   return (
-    <Field label="Text template" hint="Use {{field_id}} to insert a field value, or click a field below to insert it.">
+    <Field label="Rich text and bindings" hint="Use **bold**, *italic*, __underline__, or ~~strikethrough~~. Use {{field_id}} for database/form values and [[label]] for an inline fillable blank.">
       <textarea
         ref={textareaRef}
         className={`${inputCls} h-28 font-mono text-[12px]`}
@@ -237,20 +247,25 @@ function DynamicTextEditor({
         onBlur={e => onChange(templateToTokens(e.target.value))}
       />
       <div>
-        <span className="block text-[10.5px] text-ink/40 mt-2 mb-1">Database fields</span>
-        <div className="flex flex-wrap gap-1.5">
+        <label className="block text-[10.5px] text-ink/40 mt-2 mb-1" htmlFor="database-field-insert">
+          Insert database field
+        </label>
+        <select
+          id="database-field-insert"
+          defaultValue=""
+          className={`${inputCls} py-1.5 text-[12px]`}
+          onChange={e => {
+            if (e.target.value) insertField(e.target.value)
+            e.target.value = ''
+          }}
+        >
+          <option value="">Choose a database field…</option>
           {DATABASE_FIELDS.map(f => (
-            <button
-              key={f.value}
-              type="button"
-              onClick={() => insertField(f.value)}
-              title={`Insert {{${f.value}}}`}
-              className="focus-ring text-[11px] font-mono px-2 py-1 rounded-sm2 border border-line2 bg-paper hover:border-bottle-600 hover:bg-bottle-50 hover:text-bottle-700 transition-colors"
-            >
+            <option key={f.value} value={f.value}>
               {f.label}
-            </button>
+            </option>
           ))}
-        </div>
+        </select>
       </div>
       <div>
         <span className="block text-[10.5px] text-ink/40 mt-3 mb-1">
@@ -315,9 +330,14 @@ function TableColumnsEditor({
   return (
     <div>
       <span className="block text-[12.5px] text-ink/60 mb-1.5">
-        Columns <span className="text-ink/35">— each is a real input field for whoever fills this out</span>
+        Columns <span className="text-ink/35">— build this grid to match the form; nothing is preconfigured</span>
       </span>
       <div className="space-y-2.5">
+        {columns.length === 0 && (
+          <p className="rounded-lg border border-dashed border-line bg-paper/50 px-3 py-2.5 text-[12px] text-ink/45">
+            Start with “Add column,” then name and configure each column as needed.
+          </p>
+        )}
         {columns.map((col, i) => (
           <div key={col.id} className="border border-line rounded-sm2 p-2.5 space-y-2">
             <div className="flex gap-1.5">
