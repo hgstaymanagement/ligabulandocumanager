@@ -50,3 +50,21 @@ Client login IDs become Auth emails `{loginId}@liga-bulan.example.com` (not show
 - `npm run migrate:airtable` — one-time Airtable → Supabase copy
 - `npm run reset:admin-password` — reset the configured admin password using `.env.migrate`
 - `npm run dedupe:barangays` — merge duplicate barangays while preserving linked records
+
+## Deploy to Cloudflare Pages
+
+In Cloudflare Pages, use these build settings:
+
+- **Framework preset:** Vite
+- **Build command:** `npm run build`
+- **Build output directory:** `dist`
+
+Add these variables under **Settings → Variables and Secrets → Production** before
+deploying. They are intentionally not committed to Git:
+
+- `VITE_SUPABASE_URL`
+- `VITE_SUPABASE_ANON_KEY`
+- `VITE_ADMIN_EMAIL`
+
+Then trigger a new deployment. The included `_redirects` file makes app URLs such
+as `/admin` and `/client` work when opened or refreshed directly.
